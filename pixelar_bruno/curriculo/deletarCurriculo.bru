@@ -1,0 +1,11 @@
+meta {
+  name: deletarCurriculo
+  type: http
+  seq: 5
+}
+
+delete {
+  url: http://localhost:3000/curriculos/deletar/4
+  body: json
+  auth: inherit
+}

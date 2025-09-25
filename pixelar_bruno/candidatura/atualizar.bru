@@ -1,0 +1,21 @@
+meta {
+  name: atualizar
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:3000/candidaturas/atualizar/6
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidGlwb191c3VhcmlvIjoiYXZhbGlhZG9yIiwiaWF0IjoxNzU4MjAyMDQzLCJleHAiOjE3NTgyODg0NDN9.0iA8ZKIB2d_UYt0i8UapCz-8e_JvPQ2ahTmwG0U9xTk
+}
+
+body:json {
+  {
+    "status_candidatura": "aprovado"
+  }
+}

@@ -1,0 +1,26 @@
+meta {
+  name: criarVaga
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/vagas/criar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidGlwb191c3VhcmlvIjoiYXZhbGlhZG9yIiwiaWF0IjoxNzU4MjAyMDQzLCJleHAiOjE3NTgyODg0NDN9.0iA8ZKIB2d_UYt0i8UapCz-8e_JvPQ2ahTmwG0U9xTk
+}
+
+body:json {
+  {
+    "id_usuario": 9,
+    "titulo": "Água",
+    "descricao": "Água",
+    "requisitos": "Água",
+    "setor": "Águario",
+    "salario": 100000.00
+  }
+}

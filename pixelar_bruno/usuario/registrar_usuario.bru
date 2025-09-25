@@ -1,0 +1,20 @@
+meta {
+  name: registrar_usuario
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/usuarios/cadastrar
+  body: json
+  auth: bearer
+}
+
+body:json {
+  {
+    "nome": "vinicius",
+    "email": "vinicius@gmail.com",
+    "cpf_cnpj": "12345678910123",
+    "senha": "vini"
+  }
+}

@@ -1,0 +1,25 @@
+meta {
+  name: atualizarVaga
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:3000/vagas/atualizar/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidGlwb191c3VhcmlvIjoiYXZhbGlhZG9yIiwiaWF0IjoxNzU4MjAyMDQzLCJleHAiOjE3NTgyODg0NDN9.0iA8ZKIB2d_UYt0i8UapCz-8e_JvPQ2ahTmwG0U9xTk
+}
+
+body:json {
+  {
+    "titulo": "SEILA",
+    "descricao": "AAA SENAI",
+    "requisitos": "Programar igual o Rapha",
+    "setor": "Educacional",
+    "salario": "20000.00"
+  }
+}

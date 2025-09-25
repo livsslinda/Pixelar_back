@@ -1,0 +1,21 @@
+meta {
+  name: atualizarCurriculos
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:3000/curriculos/atualizar/4
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "data_nascimento": "1900-10-10",
+    "experiencia": "ss",
+    "formacao": "UNIP",
+    "habilidades": "Todas",
+    "redes_sociais": "zapp"
+  }
+}
