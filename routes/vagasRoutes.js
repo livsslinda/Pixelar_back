@@ -8,6 +8,7 @@ router.post("/criar", autenticarToken, somenteAvaliador, vagasController.criarVa
 router.get("/listarTodas", vagasController.listarTodas)
 router.delete("/deletar/:id", autenticarToken, somenteAvaliador, vagasController.deletarVaga)
 router.get("/listarPorId/:id", vagasController.listarPorId)
+router.get("/listarPorIdUsuario/:id", vagasController.listarPorIdUsuario)
 router.put("/atualizar/:id", autenticarToken, somenteAvaliador, vagasController.atualizarVaga)
 
 module.exports = router;
