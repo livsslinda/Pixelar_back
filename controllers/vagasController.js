@@ -33,6 +33,7 @@ const criarVaga = async (req, res) => {
     res.status(201).json(vaga);
   } catch (error) {
     console.error(error);
+
     res
       .status(500)
       .json({ erro: "Erro ao criar vaga", detalhe: error.message });
