@@ -1,15 +1,22 @@
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const conexao = require("../conexao");
 
 const usuarioModel = require("../models/usuariosModel");
 
 const cadastrarUsuario = async (req, res) => {
-  const { nome, email, cpf_cnpj, senha } = req.body;
+  const { nome, email, cpf_cnpj, senha, cargo } = req.body;
 
   try {
     const senhaHash = await usuarioModel.gerarSenhaHash(senha);
-    const usuario = await usuarioModel.criarUsuario(nome, email, cpf_cnpj, senhaHash);
+    const usuario = await usuarioModel.criarUsuario(
+      nome,
+      email,
+      cpf_cnpj,
+      senhaHash,
+      cargo
+    );
     res.status(201).json(usuario);
   } catch (error) {
     res
@@ -33,7 +40,7 @@ const loginUsuario = async (req, res) => {
       return res.status(401).json({ erro: "Senha inválida" });
     }
 
-      const token = jwt.sign(
+    const token = jwt.sign(
       {
         id: usuario.id_usuario,
         tipo_usuario: usuario.tipo_usuario,
@@ -52,7 +59,6 @@ const loginUsuario = async (req, res) => {
         tipo_usuario: usuario.tipo_usuario,
       },
     });
-
   } catch (error) {
     res
       .status(500)
@@ -62,37 +68,36 @@ const loginUsuario = async (req, res) => {
 
 const listarTodosUsuarios = async (req, res) => {
   try {
-  const usuario = await usuarioModel.listarTodosUsuarios()
+    const usuario = await usuarioModel.listarTodosUsuarios();
 
-  res.status(201).json(usuario);
+    res.status(201).json(usuario);
   } catch (error) {
     res.status(500).json({
       erro: "Erro ao buscar usuários",
       detalhe: error.message,
     });
   }
-}
+};
 
 const buscarUsuarioPorId = async (req, res) => {
   try {
-    const { id } = req.params
+    const { id } = req.params;
 
-    const usuario = await usuarioModel.buscarUsuarioPorId(id)
-    
-    res.status(201).json(usuario) 
+    const usuario = await usuarioModel.buscarUsuarioPorId(id);
+
+    res.status(201).json(usuario);
   } catch (error) {
     res.status(500).json({
       erro: `Erro ao buscar usuário ${id}`,
       detalhe: error.message,
     });
   }
-}
+};
 
 // const atualizarUsuario = async (req, res) => {
 //   try {
 //     const { id } = req.params
 //     const { nome, email, cpf_cnpj, senha } = req.body;
-
 
 //     const atualizar = await usuarioModel.atualizarUsuario(id)
 //   }
@@ -101,7 +106,7 @@ const buscarUsuarioPorId = async (req, res) => {
 const atualizarUsuario = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nome, email, cpf_cnpj, senha } = req.body;
+    const { nome, email, cpf_cnpj, cargo, senha } = req.body;
 
     const usuarioExiste = await usuarioModel.buscarUsuarioPorId(id);
     if (!usuarioExiste) {
@@ -109,45 +114,102 @@ const atualizarUsuario = async (req, res) => {
     }
 
     let senhaHash = usuarioExiste.senha;
-
     if (senha) {
       senhaHash = await usuarioModel.gerarSenhaHash(senha);
     }
 
-    const dadosAtualizados = {
-      nome,
-      email,
-      cpf_cnpj,
-      senha: senhaHash,
-    };
+    const dadosAtualizados = { nome, email, cpf_cnpj, cargo, senha: senhaHash };
 
-    const usuarioAtualizado = await usuarioModel.atualizarUsuario(id, dadosAtualizados);
+    const usuarioAtualizado = await usuarioModel.atualizarUsuario(
+      id,
+      dadosAtualizados
+    );
 
     return res.status(200).json(usuarioAtualizado);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ mensagem: "Erro interno do servidor.", detalhe: error.message });
+    return res.status(500).json({
+      mensagem: "Erro interno do servidor.",
+      detalhe: error.message,
+    });
   }
 };
 
-
 const excluirUsuario = async (req, res) => {
   try {
-    const { id } = req.params
+    const { id } = req.params;
 
-    const exclusao = await usuarioModel.excluirUsuario(id)
+    const exclusao = await usuarioModel.excluirUsuario(id);
 
-    res.status(201).json({
-      mensagem: `Usuário ${id} excluído com sucesso!`
-    }, exclusao)
-    res.status(201).json(exclusao)
+    res.status(201).json(
+      {
+        mensagem: `Usuário ${id} excluído com sucesso!`,
+      },
+      exclusao
+    );
+    res.status(201).json(exclusao);
   } catch (error) {
     res.status(500).json({
       erro: `Erro ao excluir usuário ${id}`,
       detalhe: error.message,
-    })
+    });
   }
-}
+};
+const atualizarDescricaoPerfil = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { descricao_perfil } = req.body;
+
+    if (!descricao_perfil) {
+      return res
+        .status(400)
+        .json({ mensagem: "A descrição do perfil não pode estar vazia." });
+    }
+
+    const usuario = await usuarioModel.buscarUsuarioPorId(id);
+    if (!usuario) {
+      return res.status(404).json({ mensagem: "Usuário não encontrado." });
+    }
+
+    const usuarioAtualizado = await usuarioModel.atualizarDescricaoPerfil(
+      id,
+      descricao_perfil
+    );
+
+    res.status(200).json({
+      mensagem: "Descrição do perfil atualizada com sucesso!",
+      usuario: usuarioAtualizado,
+    });
+  } catch (error) {
+    res.status(500).json({
+      erro: "Erro ao atualizar descrição do perfil",
+      detalhe: error.message,
+    });
+  }
+};
+const buscarDescricaoPorId = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const query = "SELECT descricao_perfil FROM usuario WHERE id_usuario = $1";
+    const resultado = await conexao.query(query, [id]);
+    const rows = resultado.rows;
+
+    if (rows.length === 0) {
+      return res.status(404).json({ erro: "Usuário não encontrado" });
+    }
+
+    const descricaoLimpa = rows[0].descricao_perfil
+      ? rows[0].descricao_perfil.replace(/\n/g, " ")
+      : "";
+
+    res.json({ descricao_perfil: descricaoLimpa });
+  } catch (error) {
+    res.status(500).json({
+      erro: "Erro ao buscar descrição do perfil",
+      detalhe: error.message,
+    });
+  }
+};
 
 module.exports = {
   cadastrarUsuario,
@@ -155,5 +217,7 @@ module.exports = {
   listarTodosUsuarios,
   buscarUsuarioPorId,
   atualizarUsuario,
-  excluirUsuario
+  excluirUsuario,
+  atualizarDescricaoPerfil,
+  buscarDescricaoPorId,
 };

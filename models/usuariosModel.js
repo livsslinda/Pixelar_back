@@ -1,14 +1,33 @@
 const conexao = require("../conexao");
 const bcrypt = require("bcrypt");
 
-const criarUsuario = async (nome, email, cpf_cnpj, senhaHash) => {
-    const query = "INSERT INTO usuario (nome, email, cpf_cnpj, senha) values ($1, $2, $3, $4) RETURNING *";
+const atualizarDescricaoPerfil = async (id, descricao_perfil) => {
+  const query = `
+    UPDATE usuario
+    SET descricao_perfil = $1
+    WHERE id_usuario = $2
+    RETURNING *;
+  `;
+  const values = [descricao_perfil, id];
 
-    const valores = [nome, email, cpf_cnpj, senhaHash]
-
-    const { rows } = await conexao.query(query, valores)
-    return rows[0]
-}
+  const { rows } = await conexao.query(query, values);
+  return rows[0];
+};
+const criarUsuario = async (nome, email, cpf_cnpj, senha, cargo) => {
+  const query = `
+    INSERT INTO usuario (nome, email, cpf_cnpj, senha, cargo)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *;
+  `;
+  const { rows } = await conexao.query(query, [
+    nome,
+    email,
+    cpf_cnpj,
+    senha,
+    cargo,
+  ]);
+  return rows[0];
+};
 
 const buscarUsuarioPorEmail = async (email) => {
   const query = "SELECT * FROM usuario WHERE email = $1";
@@ -17,47 +36,47 @@ const buscarUsuarioPorEmail = async (email) => {
 };
 
 const listarTodosUsuarios = async () => {
-  const query = "SELECT * from usuario"
-    const { rows } = await conexao.query(query);
+  const query = "SELECT * from usuario";
+  const { rows } = await conexao.query(query);
   return rows;
-}
+};
 
 const buscarUsuarioPorId = async (id) => {
   const query = "SELECT * FROM usuario WHERE id_usuario = $1";
   const { rows } = await conexao.query(query, [id]);
   return rows[0];
 };
+const buscarDescricaoPorId = async (id) => {
+  const query = `
+    SELECT descricao_perfil
+    FROM usuario
+    WHERE id_usuario = $1
+  `;
+  const { rows } = await conexao.query(query, [id]);
+  return rows[0]; // retorna { descricao_perfil: "..." }
+};
 
 const atualizarUsuario = async (id, dados) => {
-  let { nome, email, cpf_cnpj, senha } = dados;
+  const { nome, email, cpf_cnpj, cargo, senha } = dados;
 
   const query = `
     UPDATE usuario
-    SET nome = $1, email = $2, cpf_cnpj = $3, senha = $4
-    WHERE id_usuario = $5
+    SET nome = $1, email = $2, cpf_cnpj = $3, cargo = $4, senha = $5
+    WHERE id_usuario = $6
     RETURNING *
   `;
 
-  const { rows } = await conexao.query(query, [
-    nome,
-    email,
-    cpf_cnpj,
-    senha,
-    id,
-  ]);
+  const values = [nome, email, cpf_cnpj, cargo, senha, id];
 
+  const { rows } = await conexao.query(query, values);
   return rows[0];
 };
 
-
-
-// const atualizarUsuario = async (id)
-
 const excluirUsuario = async (id) => {
-  const query = "DELETE from usuario WHERE id_usuario = $1"
+  const query = "DELETE from usuario WHERE id_usuario = $1";
   const { rows } = await conexao.query(query, [id]);
   return rows[0];
-}
+};
 
 const gerarSenhaHash = async (senha) => {
   console.log(bcrypt.hash(senha, 10));
@@ -77,4 +96,6 @@ module.exports = {
   excluirUsuario,
   gerarSenhaHash,
   compararSenhas,
+  atualizarDescricaoPerfil,
+  buscarDescricaoPorId,
 };
