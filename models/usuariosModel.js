@@ -13,10 +13,10 @@ const atualizarDescricaoPerfil = async (id, descricao_perfil) => {
   const { rows } = await conexao.query(query, values);
   return rows[0];
 };
-const criarUsuario = async (nome, email, cpf_cnpj, senha, cargo) => {
+const criarUsuario = async (nome, email, cpf_cnpj, senha, cargo, ImageUrl) => {
   const query = `
-    INSERT INTO usuario (nome, email, cpf_cnpj, senha, cargo)
-    VALUES ($1, $2, $3, $4, $5)
+    INSERT INTO usuario (nome, email, cpf_cnpj, senha, cargo, foto)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *;
   `;
   const { rows } = await conexao.query(query, [
@@ -25,6 +25,7 @@ const criarUsuario = async (nome, email, cpf_cnpj, senha, cargo) => {
     cpf_cnpj,
     senha,
     cargo,
+    ImageUrl
   ]);
   return rows[0];
 };

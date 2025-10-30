@@ -11,7 +11,11 @@ const triagemRoutes = require("./routes/triagemRoutes");
 
 const app = express();
 
-app.use(cors());
+const bodyParser = require('body-parser');
+const { put, del } = require('@vercel/blob');
+
+app.use(cors())
+app.use(bodyParser.json({ limit: "50mb" }))
 app.use(express.json());
 
 app.get("/", (req, res) => {

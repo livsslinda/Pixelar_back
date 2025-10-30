@@ -2,11 +2,60 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const conexao = require("../conexao");
+const { put, del } = require("@vercel/blob");
 
 const usuarioModel = require("../models/usuariosModel");
 
+const uploadBase64ToStorage = async (dataUrl) => {
+  console.log(dataUrl);
+
+  if (!dataUrl || !dataUrl.startsWith("data:")) {
+    console.log("entrou no erro");
+    throw new Error("Formato de Base64 inválido.");
+  }
+
+  const parts = dataUrl.split(";base64,");
+
+  if (parts.length !== 2) {
+    throw new Error("Base64 malformado.");
+  }
+  const mimeType = parts[0].split(":")[1];
+  const base64Data = parts[1];
+
+  const fileBuffer = Buffer.from(base64Data, "base64");
+
+  // Nomes de variáveis
+  const extensaoMapeada = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "application/pdf": "pdf",
+    "image/svg+xml": "svg",
+  };
+  const extensao = extensaoMapeada[mimeType] || "bin";
+
+  // Gera nome de arquivo único (chave única no Vercel Blob)
+  const NomeArquivo = `${Date.now()}-${Math.random()
+    .toString(36)
+    .substring(2, 9)}.${extensao}`;
+
+  // Salva no Vercel Blob
+  const resultado = await put(NomeArquivo, fileBuffer, {
+    access: "public", // Permite acesso público via URL
+    contentType: mimeType, // Define o tipo de conteúdo
+  });
+
+  // Retorna a URL pública gerada pelo Vercel Blob
+  return resultado.url;
+};
+
 const cadastrarUsuario = async (req, res) => {
-  const { nome, email, cpf_cnpj, senha, cargo } = req.body;
+  const { nome, email, cpf_cnpj, senha, cargo, foto } = req.body;
+  console.log("cadastro usuario");
+  let ImageUrl;
+  console.log(nome);
+  console.log(foto);
+  ImageUrl = await uploadBase64ToStorage(foto);
+  console.log(ImageUrl);
 
   try {
     const senhaHash = await usuarioModel.gerarSenhaHash(senha);
@@ -15,7 +64,8 @@ const cadastrarUsuario = async (req, res) => {
       email,
       cpf_cnpj,
       senhaHash,
-      cargo
+      cargo,
+      ImageUrl
     );
     res.status(201).json(usuario);
   } catch (error) {
