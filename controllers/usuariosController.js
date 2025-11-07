@@ -156,7 +156,7 @@ const buscarUsuarioPorId = async (req, res) => {
 const atualizarUsuario = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nome, email, cpf_cnpj, cargo, senha } = req.body;
+    const { nome, email, cpf_cnpj, cargo, senha, foto } = req.body;
 
     const usuarioExiste = await usuarioModel.buscarUsuarioPorId(id);
     if (!usuarioExiste) {
@@ -167,8 +167,20 @@ const atualizarUsuario = async (req, res) => {
     if (senha) {
       senhaHash = await usuarioModel.gerarSenhaHash(senha);
     }
+    let ImageUrl = usuarioExiste.foto;
 
-    const dadosAtualizados = { nome, email, cpf_cnpj, cargo, senha: senhaHash };
+    if (foto && foto.startsWith("data:")) {
+      ImageUrl = await uploadBase64ToStorage(foto);
+    }
+
+    const dadosAtualizados = {
+      nome,
+      email,
+      cpf_cnpj,
+      cargo,
+      senha: senhaHash,
+      foto: ImageUrl,
+    };
 
     const usuarioAtualizado = await usuarioModel.atualizarUsuario(
       id,
