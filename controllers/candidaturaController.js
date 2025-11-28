@@ -2,10 +2,14 @@ const candidaturaModel = require("../models/candidaturaModels");
 
 // Criar
 const criar = async (req, res) => {
-  const { id_vaga, id_curriculo } = req.body;
-
+  const { id_vaga, id_curriculo, id_usuario } = req.body;
   try {
-    const nova = await candidaturaModel.criarCandidatura(id_vaga, id_curriculo);
+    const nova = await candidaturaModel.criarCandidatura(
+      id_vaga,
+      id_curriculo,
+      id_usuario
+    );
+
     res.status(201).json(nova);
   } catch (error) {
     res
@@ -43,16 +47,35 @@ const buscarPorId = async (req, res) => {
       .json({ erro: "Erro ao buscar candidatura", detalhe: error.message });
   }
 };
+const buscarPorUsuario = async (req, res) => {
+  const { id_usuario } = req.params;
+
+  try {
+    const candidatura = await candidaturaModel.buscarCandidaturaPorUsuario(id_usuario);
+
+    if (!candidatura) {
+      return res.status(404).json({ erro: "Nenhuma candidatura encontrada" });
+    }
+
+    res.json(candidatura);
+  } catch (error) {
+    res.status(500).json({
+      erro: "Erro ao buscar candidatura",
+      detalhe: error.message,
+    });
+  }
+};
 
 // Atualizar status
 const atualizar = async (req, res) => {
   const { id } = req.params;
-  const { status_candidatura } = req.body;
+  const { status_candidatura, pontuacao } = req.body;
 
   try {
-    const candidatura = await candidaturaModel.atualizarStatus(
+    const candidatura = await candidaturaModel.atualizar(
       id,
-      status_candidatura
+      status_candidatura,
+      pontuacao
     );
     if (!candidatura) {
       return res.status(404).json({ erro: "Candidatura não encontrada" });
@@ -85,4 +108,5 @@ module.exports = {
   buscarPorId,
   atualizar,
   deletar,
+  buscarPorUsuario,
 };
